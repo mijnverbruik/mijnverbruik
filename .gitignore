@@ -1,0 +1,17 @@
+/*.ez
+/_build/
+/.fetch
+/assets/node_modules/
+/assets/npm-debug.log
+/cover/
+/deps/
+/doc/
+/erl_crash.dump
+/mijnverbruik-*.tar
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# Database files
+*.db
+*.db-*
+
