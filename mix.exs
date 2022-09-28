@@ -33,6 +33,8 @@ defmodule Mijnverbruik.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:circuits_uart, "~> 1.5"},
+      {:dsmr, github: "webstronauts/ex_dsmr"},
       {:ecto_sql, "~> 3.6"},
       {:ecto_sqlite3, ">= 0.0.0"},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},

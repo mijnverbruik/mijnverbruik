@@ -17,6 +17,9 @@ config :mijnverbruik, MijnverbruikWeb.Endpoint,
   secret_key_base: "Ml8Rroe44cL9M/+7O0tKwuGWB3F919qGngoNZwMdvJSmsqEFBf7uF/vmdfw21PSO",
   server: false
 
+# In test we don't read the meter values.
+config :mijnverbruik, meter_enabled: false
+
 # In test we don't send emails.
 config :mijnverbruik, Mijnverbruik.Mailer, adapter: Swoosh.Adapters.Test
 
