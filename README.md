@@ -1,5 +1,7 @@
 # Mijnverbruik
 
+[![CI Status](https://github.com/mijnverbruik/mijnverbruik/actions/workflows/test.yml/badge.svg)](https://github.com/mijnverbruik/mijnverbruik/actions/workflows/test.yml)
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
