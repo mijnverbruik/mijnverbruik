@@ -50,7 +50,8 @@ defmodule Mijnverbruik.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+      {:tz, "~> 0.22"}
     ]
   end
 

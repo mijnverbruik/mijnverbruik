@@ -2,6 +2,8 @@ defmodule Mijnverbruik.DSMR.Meter do
   @moduledoc false
   use GenServer
 
+  alias Mijnverbruik.Measurements
+
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -19,9 +21,11 @@ defmodule Mijnverbruik.DSMR.Meter do
   end
 
   @impl true
-  def handle_info({:telegram, telegram}, state) do
-    case DSMR.parse(telegram) do
-      {:ok, parsed} -> IO.inspect(parsed.checksum)
+  def handle_info({:telegram, data}, state) do
+    with {:ok, telegram} <- DSMR.parse(data),
+         {:ok, measurement} <- Measurements.create_measurement(telegram) do
+      IO.inspect(measurement)
+    else
       {:error, error} -> IO.inspect(error)
     end
 

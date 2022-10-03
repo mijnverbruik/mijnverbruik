@@ -27,6 +27,9 @@ config :mijnverbruik, MijnverbruikWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :mijnverbruik, Mijnverbruik.Mailer, adapter: Swoosh.Adapters.Local
 
+# Configure Elixir to use TZ as timezone database.
+config :elixir, :time_zone_database, Tz.TimeZoneDatabase
+
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
 
