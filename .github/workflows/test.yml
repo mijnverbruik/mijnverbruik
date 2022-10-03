@@ -1,0 +1,44 @@
+name: Test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  otp-version: 24.3
+  elixir-version: 1.13.3
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install OTP and Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.otp-version }}
+          elixir-version: ${{ env.elixir-version }}
+
+      - name: Cache mix deps
+        uses: actions/cache@v3
+        env:
+          cache-name: mix
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ env.otp-version }}-${{ env.elixir-version }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-${{ env.otp-version }}-${{ env.elixir-version }}-
+
+      - run: mix deps.get
+      - run: mix deps.unlock --check-unused
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: mix test
