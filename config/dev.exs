@@ -22,7 +22,7 @@ config :mijnverbruik, MijnverbruikWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "kyXbNrQFIzbIJlFnG+bxrzV0h/RB33kBzZ675T9nKdQxbrLv/tG0JCL4kVWq9XmC",
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 

@@ -6,21 +6,54 @@ defmodule MijnverbruikWeb.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <h1>Dashboard</h1>
-    <dl>
-      <dt>
-        Electricity Currently Used
-      </dt>
-      <dd>
-        <%= @measurement.electricity_currently_delivered %> W
-      </dd>
-      <dt>
-        Electricity Currently Returned
-      </dt>
-      <dd>
-      <%= @measurement.electricity_currently_returned %> W
-      </dd>
-    </dl>
+    <div class="bg-white rounded-lg shadow-sm p-4 m-4">
+      <h2 class="border-b border-gray-100 font-bold pb-2">
+        Electricity Balance
+      </h2>
+      <div class="flex text-center mt-2">
+        <div class="space-y-1 w-1/3">
+          <div>
+            <span class="text-lg font-bold">
+              <%= @measurement.electricity_currently_delivered %> W
+            </span>
+            <span class="text-xs">
+              W
+            </span>
+          </div>
+          <div class="text-sm text-gray-500">
+            Realtime
+          </div>
+        </div>
+
+        <div class="space-y-1 w-1/3">
+          <div>
+            <span class="text-lg font-bold">
+              <%= @measurement.electricity_currently_delivered %> W
+            </span>
+            <span class="text-xs">
+              kWh
+            </span>
+          </div>
+          <div class="text-sm text-gray-500">
+            Today
+          </div>
+        </div>
+
+        <div class="space-y-1 w-1/3">
+          <div>
+            <span class="text-lg font-bold">
+              <%= @measurement.electricity_currently_delivered %> W
+            </span>
+            <span class="text-xs">
+              kWh
+            </span>
+          </div>
+          <div class="text-sm text-gray-500">
+            Cost
+          </div>
+        </div>
+      </div>
+    </div>
     """
   end
 

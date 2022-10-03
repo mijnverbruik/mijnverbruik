@@ -1,8 +1,8 @@
 /* This file is for your main application CSS */
 
-dt::after {
-  content: ": ";
-}
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* LiveView specific classes for your customization */
 .phx-no-feedback.invalid-feedback,
@@ -87,3 +87,4 @@ dt::after {
   0% { opacity: 1; }
   100% { opacity: 0; }
 }
+
