@@ -4,8 +4,8 @@ defmodule Mijnverbruik.MeasurementsTest do
   alias Mijnverbruik.Measurements
   alias Mijnverbruik.Measurements.Measurement
 
-  describe "measurements" do
-    test "create_measurement/1 with valid telegram creates a measurement" do
+  describe "create_measurement/1" do
+    test "with valid telegram creates a measurement" do
       timestamp = DateTime.utc_now()
 
       telegram = %DSMR.Telegram{
@@ -19,6 +19,17 @@ defmodule Mijnverbruik.MeasurementsTest do
 
       assert {:ok, %Measurement{} = measurement} = Measurements.create_measurement(telegram)
       assert measurement.measured_at == timestamp
+    end
+  end
+
+  describe "broadcast_measurement/1" do
+    test "notifies subscribers of new measurements" do
+      Measurements.subscribe()
+
+      measurement = %Measurement{}
+      Measurements.broadcast_measurement(measurement)
+
+      assert_received {:measurement, ^measurement}
     end
   end
 end

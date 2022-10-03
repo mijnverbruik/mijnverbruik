@@ -3,6 +3,45 @@ defmodule Mijnverbruik.Measurements.Measurement do
 
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{
+          equipment_id: String.t(),
+          electricity_delivered_1: Decimal.t() | nil,
+          electricity_delivered_2: Decimal.t() | nil,
+          electricity_returned_1: Decimal.t() | nil,
+          electricity_returned_2: Decimal.t() | nil,
+          electricity_currently_delivered: Decimal.t(),
+          electricity_currently_returned: Decimal.t(),
+          phase_currently_delivered_l1: Decimal.t() | nil,
+          phase_currently_delivered_l2: Decimal.t() | nil,
+          phase_currently_delivered_l3: Decimal.t() | nil,
+          phase_currently_returned_l1: Decimal.t() | nil,
+          phase_currently_returned_l2: Decimal.t() | nil,
+          phase_currently_returned_l3: Decimal.t() | nil,
+          phase_power_l1: integer() | nil,
+          phase_power_l2: integer() | nil,
+          phase_power_l3: integer() | nil,
+          phase_voltage_l1: Decimal.t() | nil,
+          phase_voltage_l2: Decimal.t() | nil,
+          phase_voltage_l3: Decimal.t() | nil,
+          mbus_channel_1_equipment_id: String.t() | nil,
+          mbus_channel_1_device_type: String.t() | nil,
+          mbus_channel_1_measured_at: Datetime.t() | nil,
+          mbus_channel_1_delivered: Decimal.t() | nil,
+          mbus_channel_2_equipment_id: String.t() | nil,
+          mbus_channel_2_device_type: String.t() | nil,
+          mbus_channel_2_measured_at: Datetime.t() | nil,
+          mbus_channel_2_delivered: Decimal.t() | nil,
+          mbus_channel_3_equipment_id: String.t() | nil,
+          mbus_channel_3_device_type: String.t() | nil,
+          mbus_channel_3_measured_at: Datetime.t() | nil,
+          mbus_channel_3_delivered: Decimal.t() | nil,
+          mbus_channel_4_equipment_id: String.t() | nil,
+          mbus_channel_4_device_type: String.t() | nil,
+          mbus_channel_4_measured_at: Datetime.t() | nil,
+          mbus_channel_4_delivered: Decimal.t() | nil,
+          measured_at: Datetime.t()
+        }
+
   @primary_key false
 
   schema "measurements" do
@@ -30,14 +69,14 @@ defmodule Mijnverbruik.Measurements.Measurement do
     field :phase_voltage_l2, :decimal
     field :phase_voltage_l3, :decimal
 
-    field :measured_at, :utc_datetime_usec
-
     for channel <- 1..4 do
       field :"mbus_channel_#{channel}_equipment_id", :string
       field :"mbus_channel_#{channel}_device_type", :integer
       field :"mbus_channel_#{channel}_measured_at", :utc_datetime_usec
       field :"mbus_channel_#{channel}_delivered", :decimal
     end
+
+    field :measured_at, :utc_datetime_usec
   end
 
   def changeset(measurement, attrs) do

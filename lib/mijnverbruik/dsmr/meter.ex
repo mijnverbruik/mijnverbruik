@@ -24,7 +24,7 @@ defmodule Mijnverbruik.DSMR.Meter do
   def handle_info({:telegram, data}, state) do
     with {:ok, telegram} <- DSMR.parse(data),
          {:ok, measurement} <- Measurements.create_measurement(telegram) do
-      IO.inspect(measurement)
+      :ok = Measurements.broadcast_measurement(measurement)
     else
       {:error, error} -> IO.inspect(error)
     end

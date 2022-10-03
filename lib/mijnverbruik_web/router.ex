@@ -17,13 +17,10 @@ defmodule MijnverbruikWeb.Router do
   scope "/", MijnverbruikWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live_session :default do
+      live "/", DashboardLive, :index
+    end
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", MijnverbruikWeb do
-  #   pipe_through :api
-  # end
 
   # Enables LiveDashboard only for development
   #

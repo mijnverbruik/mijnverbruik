@@ -34,6 +34,7 @@ defmodule Mijnverbruik.MixProject do
   defp deps do
     [
       {:circuits_uart, "~> 1.5"},
+      {:decimal, "~> 2.0"},
       {:dsmr, github: "webstronauts/ex_dsmr"},
       {:ecto_sql, "~> 3.6"},
       {:ecto_sqlite3, ">= 0.0.0"},

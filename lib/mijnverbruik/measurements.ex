@@ -1,8 +1,15 @@
 defmodule Mijnverbruik.Measurements do
   @moduledoc false
 
+  import Ecto.Query
+
   alias Mijnverbruik.Measurements.Measurement
   alias Mijnverbruik.Repo
+
+  def get_latest_measurement() do
+    from(Measurement, order_by: [desc: :measured_at], limit: 1)
+    |> Repo.one()
+  end
 
   def create_measurement(%DSMR.Telegram{} = telegram) do
     telegram
@@ -190,4 +197,30 @@ defmodule Mijnverbruik.Measurements do
 
   defp mbus?(%DSMR.Telegram.MBus{}), do: true
   defp mbus?(_), do: false
+
+  @spec broadcast_measurement(Measurement.t()) :: :ok
+  def broadcast_measurement(measurement) do
+    Phoenix.PubSub.broadcast(Mijnverbruik.PubSub, "measurements", {:measurement, measurement})
+  end
+
+  @doc """
+  Subscribes to updates in measurements.
+
+  ## Messages
+
+    * `{:measurement, measurement}`
+
+  """
+  @spec subscribe() :: :ok | {:error, term()}
+  def subscribe() do
+    Phoenix.PubSub.subscribe(Mijnverbruik.PubSub, "measurements")
+  end
+
+  @doc """
+  Unsubscribes from `subscribe/1`.
+  """
+  @spec unsubscribe() :: :ok
+  def unsubscribe() do
+    Phoenix.PubSub.unsubscribe(Mijnverbruik.PubSub, "measurements")
+  end
 end
