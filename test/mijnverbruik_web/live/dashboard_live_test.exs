@@ -5,16 +5,21 @@ defmodule MijnverbruikWeb.DashboardLiveTest do
   import Mijnverbruik.MeasurementsFixtures
 
   describe "index" do
-    test "updates latest measurement", %{conn: conn} do
+    test "updates realtime measurement", %{conn: conn} do
       measurement_fixture(%{
         electricity_currently_delivered: Decimal.new("0.697"),
         electricity_currently_returned: Decimal.new("0.432")
       })
 
-      {:ok, view, html} = live(conn, Routes.dashboard_path(conn, :index))
-      assert html =~ "<h1>Dashboard</h1>"
-      assert html =~ "0.697 W"
-      assert html =~ "0.432 W"
+      {:ok, view, _} = live(conn, Routes.dashboard_path(conn, :index))
+
+      assert view
+             |> element("#electricity-balance h2")
+             |> render() =~ "Electricity Balance"
+
+      assert view
+             |> element("#electricity-balance .realtime")
+             |> render() =~ "265"
 
       measurement =
         measurement_fixture(%{
@@ -24,9 +29,9 @@ defmodule MijnverbruikWeb.DashboardLiveTest do
 
       send(view.pid, {:measurement, measurement})
 
-      html = render(view)
-      assert html =~ "0.789 W"
-      assert html =~ "0.321 W"
+      assert view
+             |> element("#electricity-balance .realtime")
+             |> render() =~ "468"
     end
   end
 end

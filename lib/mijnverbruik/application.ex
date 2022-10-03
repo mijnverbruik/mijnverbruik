@@ -7,18 +7,19 @@ defmodule Mijnverbruik.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the Ecto repository
-      Mijnverbruik.Repo,
-      # Start the DSMR meter
-      meter_spec(),
-      # Start the Telemetry supervisor
-      MijnverbruikWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: Mijnverbruik.PubSub},
-      # Start the Endpoint (http/https)
-      MijnverbruikWeb.Endpoint
-    ]
+    children =
+      [
+        # Start the Ecto repository
+        Mijnverbruik.Repo,
+        # Start the Telemetry supervisor
+        MijnverbruikWeb.Telemetry,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: Mijnverbruik.PubSub},
+        # Start the Endpoint (http/https)
+        MijnverbruikWeb.Endpoint
+      ] ++
+        meter_specs() ++
+        summaries_specs()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -26,15 +27,25 @@ defmodule Mijnverbruik.Application do
     Supervisor.start_link(children, opts)
   end
 
-  defp meter_spec() do
-    name = Mijnverbruik.DSMR.Meter
-
-    if Mijnverbruik.Config.meter_enabled?() do
-      {name, host: "10.10.0.4", port: 23}
-      # {name, tty: "/dev/dummy2"}
+  defp meter_specs() do
+    if server?() && Mijnverbruik.Config.meter_enabled?() do
+      [{Mijnverbruik.DSMR.Meter, host: "10.10.0.4", port: 23}]
+      # [{Mijnverbruik.DSMR.Meter, tty: "/dev/dummy2"}]
     else
-      %{id: name, start: {Function, :identity, [:ignore]}}
+      []
     end
+  end
+
+  defp summaries_specs() do
+    if server?() do
+      [Mijnverbruik.UpdateSummaries]
+    else
+      []
+    end
+  end
+
+  defp server?() do
+    Phoenix.Endpoint.server?(:mijnverbruik, MijnverbruikWeb.Endpoint)
   end
 
   # Tell Phoenix to update the endpoint configuration

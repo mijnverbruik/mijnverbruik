@@ -3,9 +3,81 @@ defmodule Mijnverbruik.Measurements do
 
   import Ecto.Query
 
-  alias Mijnverbruik.Measurements.Measurement
+  alias Mijnverbruik.Measurements.{Measurement, Summary}
   alias Mijnverbruik.Repo
 
+  # Summaries
+
+  def get_summary_for_60m(period) do
+    Summary.per_60m()
+    |> get_summary_for_period(period)
+  end
+
+  def get_summary_for_24h(period) do
+    Summary.per_24h()
+    |> get_summary_for_period(period)
+  end
+
+  defp get_summary_for_period(query, period) do
+    from(
+      q in query,
+      select_merge: %{
+        mbus_channel_1_delivered:
+          q.mbus_channel_1_delivered -
+            over(lead(q.mbus_channel_1_delivered),
+              order_by: [desc: q.mbus_channel_1_measured_at]
+            ),
+        mbus_channel_2_delivered:
+          q.mbus_channel_2_delivered -
+            over(lead(q.mbus_channel_2_delivered),
+              order_by: [desc: q.mbus_channel_2_measured_at]
+            ),
+        mbus_channel_3_delivered:
+          q.mbus_channel_3_delivered -
+            over(lead(q.mbus_channel_3_delivered),
+              order_by: [desc: q.mbus_channel_3_measured_at]
+            ),
+        mbus_channel_4_delivered:
+          q.mbus_channel_4_delivered -
+            over(lead(q.mbus_channel_4_delivered),
+              order_by: [desc: q.mbus_channel_4_measured_at]
+            )
+      },
+      where: q.measured_at <= ^period,
+      order_by: [desc: q.measured_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  @spec summarize_last_hour() :: :ok
+  def summarize_last_hour() do
+    Summary.summarize_last_hour_query() |> upsert_last_period("measurements_per_60m")
+  end
+
+  @spec summarize_last_day() :: :ok
+  def summarize_last_day() do
+    Summary.summarize_last_day_query() |> upsert_last_period("measurements_per_24h")
+  end
+
+  defp upsert_last_period(query, source) do
+    {_, nil} =
+      Repo.insert_all(
+        {source, Summary},
+        query,
+        # When the summary for a given period already exists, we just replace it
+        # with a new summary. This works because the query is using a "window" of one
+        # or more rows to resummarize a given period.
+        on_conflict: :replace_all,
+        conflict_target: [:equipment_id, :measured_at]
+      )
+
+    :ok
+  end
+
+  # Measurements
+
+  @spec get_latest_measurement() :: Measurement.t() | nil
   def get_latest_measurement() do
     from(Measurement, order_by: [desc: :measured_at], limit: 1)
     |> Repo.one()
