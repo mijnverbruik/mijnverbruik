@@ -2,6 +2,8 @@ defmodule Mijnverbruik.DSMR.Remote do
   @moduledoc false
   use GenServer
 
+  require Logger
+
   alias Mijnverbruik.DSMR.Adapter
 
   @behaviour Adapter
@@ -13,21 +15,24 @@ defmodule Mijnverbruik.DSMR.Remote do
 
   @impl GenServer
   def init({parent_pid, opts}) do
-    host = Keyword.fetch!(opts, :host)
-    port = Keyword.fetch!(opts, :port)
-
-    {:ok, host} = parse_host(host)
+    {:ok, host} = parse_host(opts[:host])
 
     state = %{socket: nil, parent_pid: parent_pid, telegram: ""}
-    {:ok, state, {:continue, host: host, port: port}}
+    {:ok, state, {:continue, host: host, port: opts[:port]}}
   end
 
   @impl GenServer
-  def handle_continue(socket_opts, state) do
-    {:ok, socket} =
-      :gen_tcp.connect(socket_opts[:host], socket_opts[:port], [:binary, packet: 0, active: true])
+  def handle_continue(opts, state) do
+    socket_opts = [:binary, packet: 0, active: true, keepalive: true]
 
-    {:noreply, %{state | socket: socket}}
+    case :gen_tcp.connect(opts[:host], opts[:port], socket_opts) do
+      {:ok, socket} ->
+        {:noreply, %{state | socket: socket}}
+
+      {:error, reason} ->
+        Logger.error("Unable to connect to remote TCP socket - reason: #{inspect(reason)}")
+        {:stop, :normal, state}
+    end
   end
 
   @impl GenServer
@@ -41,6 +46,18 @@ defmodule Mijnverbruik.DSMR.Remote do
   @impl GenServer
   def handle_info({:tcp, _socket, line}, state) do
     {:noreply, %{state | telegram: state.telegram <> line}}
+  end
+
+  @impl GenServer
+  def handle_info({:tcp_closed, _socket}, state) do
+    Logger.error("Remote TCP socket unexpectedly closed the connection")
+    {:stop, :normal, state}
+  end
+
+  @impl GenServer
+  def handle_info({:tcp_error, _socket, reason}, state) do
+    Logger.error("Remote TCP socket unexpectedly errored - reason: #{inspect(reason)}")
+    {:stop, :normal, state}
   end
 
   defp parse_host(host) when is_binary(host) do
