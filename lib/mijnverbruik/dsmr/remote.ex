@@ -17,7 +17,7 @@ defmodule Mijnverbruik.DSMR.Remote do
   def init({parent_pid, opts}) do
     {:ok, host} = parse_host(opts[:host])
 
-    state = %{socket: nil, parent_pid: parent_pid, telegram: ""}
+    state = %{socket: nil, parent_pid: parent_pid, frames: ""}
     {:ok, state, {:continue, host: host, port: opts[:port]}}
   end
 
@@ -36,16 +36,14 @@ defmodule Mijnverbruik.DSMR.Remote do
   end
 
   @impl GenServer
-  def handle_info({:tcp, _socket, "!" <> _crc = line}, state) do
-    telegram = state.telegram <> line
-    send(state.parent_pid, {:telegram, telegram})
-
-    {:noreply, %{state | telegram: ""}}
-  end
-
-  @impl GenServer
-  def handle_info({:tcp, _socket, line}, state) do
-    {:noreply, %{state | telegram: state.telegram <> line}}
+  def handle_info({:tcp, _socket, frame}, state) do
+    case Regex.split(~r/(\![^\r]+)\r\n/, state.frames <> frame, parts: 2, include_captures: true) do
+      [frames] ->
+        {:noreply, %{state | frames: frames}}
+      [frames, checksum, rest] ->
+        send(state.parent_pid, {:telegram, frames <> checksum})
+        {:noreply, %{state | frames: rest}}
+    end
   end
 
   @impl GenServer
