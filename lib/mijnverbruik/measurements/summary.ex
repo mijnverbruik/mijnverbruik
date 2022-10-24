@@ -109,6 +109,7 @@ defmodule Mijnverbruik.Measurements.Summary do
       windows: [
         bucket: [
           partition_by: [m.equipment_id, fragment("strftime(?, ?)", ^period, m.measured_at)],
+          order_by: [desc: m.measured_at],
           frame: fragment("RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING")
         ]
       ]
