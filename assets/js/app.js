@@ -13,18 +13,26 @@ Hooks.AnimatedValue = {
 
   updated() {
     let diff = this.value - this.el.dataset.animatedValue,
-        prev = this.value
+      prev = this.value
 
     this.value = this.el.dataset.animatedValue
 
-    animate(progress => {
-      this.el.innerText = Math.round(prev - diff * progress)
-    }, { duration: 0.5, easing: spring() })
-  }
+    animate(
+      (progress) => {
+        this.el.innerText = Math.round(prev - diff * progress)
+      },
+      {duration: 0.5, easing: spring()}
+    )
+  },
 }
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
+let csrfToken = document
+  .querySelector("meta[name='csrf-token']")
+  .getAttribute("content")
+let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
+  params: {_csrf_token: csrfToken},
+})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

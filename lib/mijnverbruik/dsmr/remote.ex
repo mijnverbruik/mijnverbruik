@@ -40,6 +40,7 @@ defmodule Mijnverbruik.DSMR.Remote do
     case Regex.split(~r/(\![^\r]+)\r\n/, state.frames <> frame, parts: 2, include_captures: true) do
       [frames] ->
         {:noreply, %{state | frames: frames}}
+
       [frames, checksum, rest] ->
         send(state.parent_pid, {:telegram, frames <> checksum})
         {:noreply, %{state | frames: rest}}

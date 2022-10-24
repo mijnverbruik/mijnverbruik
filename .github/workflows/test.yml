@@ -8,6 +8,7 @@ on:
 env:
   otp-version: 24.3
   elixir-version: 1.13.3
+  node-version: 16.18
 
 jobs:
   test:
@@ -25,7 +26,7 @@ jobs:
           otp-version: ${{ env.otp-version }}
           elixir-version: ${{ env.elixir-version }}
 
-      - name: Cache mix deps
+      - name: Cache mix dependencies
         uses: actions/cache@v3
         env:
           cache-name: mix
@@ -37,8 +38,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ env.cache-name }}-${{ env.otp-version }}-${{ env.elixir-version }}-
 
-      - run: mix deps.get
-      - run: mix deps.unlock --check-unused
-      - run: mix format --check-formatted
-      - run: mix compile --warnings-as-errors
-      - run: mix test
+      - name: Install mix dependencies
+        run: |
+          mix deps.get
+          mix deps.unlock --check-unused
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Check compile warnings
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.node-version }}
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install npm dependencies
+        run: npm ci --prefix assets
+
+      - name: Check assets formatting
+        run: npm run format-check --prefix assets

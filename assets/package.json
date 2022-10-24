@@ -1,10 +1,22 @@
 {
   "private": true,
+  "scripts": {
+    "format": "prettier --write {js,css}/**/*.{js,json,css,md} --no-error-on-unmatched-pattern",
+    "format-check": "prettier --check {js,css}/**/*.{js,json,css,md} --no-error-on-unmatched-pattern"
+  },
   "dependencies": {
     "motion": "^10.14.2",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
     "phoenix_live_view": "file:../deps/phoenix_live_view",
     "topbar": "^1.0.1"
+  },
+  "devDependencies": {
+    "prettier": "^2.7.1"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "trailingComma": "es5"
   }
 }
