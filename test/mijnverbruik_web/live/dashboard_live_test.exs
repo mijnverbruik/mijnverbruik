@@ -14,11 +14,11 @@ defmodule MijnverbruikWeb.DashboardLiveTest do
       {:ok, view, _} = live(conn, Routes.dashboard_path(conn, :index))
 
       assert view
-             |> element("#electricity-balance h2")
-             |> render() =~ "Electricity Balance"
+             |> element("#electricity-panel h2")
+             |> render() =~ "Electricity"
 
       assert view
-             |> element("#electricity-balance .realtime")
+             |> element("#electricity-realtime-value")
              |> render() =~ "265"
 
       measurement =
@@ -30,7 +30,7 @@ defmodule MijnverbruikWeb.DashboardLiveTest do
       send(view.pid, {:measurement, measurement})
 
       assert view
-             |> element("#electricity-balance .realtime")
+             |> element("#electricity-realtime-value")
              |> render() =~ "468"
     end
   end

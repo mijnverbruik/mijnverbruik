@@ -95,6 +95,7 @@ defmodule MijnverbruikWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
+      import MijnverbruikWeb.LiveHelpers
       import MijnverbruikWeb.ErrorHelpers
       import MijnverbruikWeb.Gettext
       alias MijnverbruikWeb.Router.Helpers, as: Routes

@@ -8,16 +8,17 @@ defmodule MijnverbruikWeb.DashboardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="electricity-balance" class="bg-white rounded-lg shadow-sm p-4 m-4">
+    <div id="electricity-panel" class="bg-white rounded-lg shadow-sm p-4 m-4">
       <h2 class="border-b border-gray-100 font-bold pb-2">
-        Electricity Balance
+        <%= gettext "Electricity" %>
       </h2>
       <div class="flex text-center mt-2">
         <div class="space-y-1 w-1/3">
-          <div class="realtime">
-            <span class="text-lg font-bold">
+          <div>
+            <.animated_value id="electricity-realtime-value" class="text-lg font-bold">
               <%= MeasurementHelpers.electricity_currently_used(@measurement) |> MeasurementHelpers.to_watt() %>
-            </span>
+            </.animated_value>
+
             <span class="text-xs">
               W
             </span>
@@ -28,7 +29,7 @@ defmodule MijnverbruikWeb.DashboardLive do
         </div>
 
         <div class="space-y-1 w-1/3">
-          <div class="today">
+          <div>
             <span class="text-lg font-bold">
               <%= MeasurementHelpers.electricity_total_used(@daily_summary) |> MeasurementHelpers.to_kilowatt_hour() %>
             </span>
@@ -42,7 +43,7 @@ defmodule MijnverbruikWeb.DashboardLive do
         </div>
 
         <div class="space-y-1 w-1/3">
-          <div class="cost">
+          <div>
             <span class="text-lg font-bold">
               <%= @measurement.electricity_currently_delivered %>
             </span>
