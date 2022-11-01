@@ -8,6 +8,9 @@ defmodule Mijnverbruik.DSMR.Remote do
 
   @behaviour Adapter
 
+  @connect_timeout 5000
+  @recv_timeout 5000
+
   @impl Adapter
   def start_link(parent_pid, opts) do
     GenServer.start_link(__MODULE__, {parent_pid, opts}, name: __MODULE__)
@@ -17,16 +20,17 @@ defmodule Mijnverbruik.DSMR.Remote do
   def init({parent_pid, opts}) do
     {:ok, host} = parse_host(opts[:host])
 
-    state = %{socket: nil, parent_pid: parent_pid, frames: ""}
+    state = %{socket: nil, parent_pid: parent_pid, lines: ""}
     {:ok, state, {:continue, host: host, port: opts[:port]}}
   end
 
   @impl GenServer
   def handle_continue(opts, state) do
-    socket_opts = [:binary, packet: 0, active: true, keepalive: true]
+    socket_opts = [:binary, active: false, packet: :line]
 
-    case :gen_tcp.connect(opts[:host], opts[:port], socket_opts) do
+    case :gen_tcp.connect(opts[:host], opts[:port], socket_opts, @connect_timeout) do
       {:ok, socket} ->
+        send(self(), :recv_loop)
         {:noreply, %{state | socket: socket}}
 
       {:error, reason} ->
@@ -36,27 +40,28 @@ defmodule Mijnverbruik.DSMR.Remote do
   end
 
   @impl GenServer
-  def handle_info({:tcp, _socket, frame}, state) do
-    case Regex.split(~r/(\![^\r]+)\r\n/, state.frames <> frame, parts: 2, include_captures: true) do
-      [frames] ->
-        {:noreply, %{state | frames: frames}}
+  def handle_info(:recv_loop, state) do
+    case :gen_tcp.recv(state.socket, 0, @recv_timeout) do
+      {:ok, line} ->
+        send(self(), {:recv_line, line})
+        send(self(), :recv_loop)
+        {:noreply, state}
 
-      [frames, checksum, rest] ->
-        send(state.parent_pid, {:telegram, frames <> checksum})
-        {:noreply, %{state | frames: rest}}
+      {:error, reason} ->
+        Logger.error("TCP connection error - reason: #{inspect(reason)}")
+        {:stop, :normal, state}
     end
   end
 
   @impl GenServer
-  def handle_info({:tcp_closed, _socket}, state) do
-    Logger.error("Remote TCP socket unexpectedly closed the connection")
-    {:stop, :normal, state}
+  def handle_info({:recv_line, "!" <> _ = line}, state) do
+    send(state.parent_pid, {:telegram, state.lines <> line})
+    {:noreply, %{state | lines: ""}}
   end
 
   @impl GenServer
-  def handle_info({:tcp_error, _socket, reason}, state) do
-    Logger.error("Remote TCP socket unexpectedly errored - reason: #{inspect(reason)}")
-    {:stop, :normal, state}
+  def handle_info({:recv_line, line}, state) do
+    {:noreply, %{state | lines: state.lines <> line}}
   end
 
   defp parse_host(host) when is_binary(host) do

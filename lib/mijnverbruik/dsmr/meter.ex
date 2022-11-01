@@ -2,6 +2,8 @@ defmodule Mijnverbruik.DSMR.Meter do
   @moduledoc false
   use GenServer
 
+  require Logger
+
   alias Mijnverbruik.Measurements
 
   @spec start_link(keyword()) :: GenServer.on_start()
@@ -26,7 +28,8 @@ defmodule Mijnverbruik.DSMR.Meter do
          {:ok, measurement} <- Measurements.create_measurement(telegram) do
       :ok = Measurements.broadcast_measurement(measurement)
     else
-      {:error, error} -> IO.inspect(error)
+      {:error, error} ->
+        Logger.error("Errored while parsing telegram - reason: #{inspect(error)}")
     end
 
     {:noreply, state}
