@@ -2,35 +2,14 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "topbar"
-import {animate, spring} from "motion"
-
-let Hooks = {}
-
-Hooks.AnimatedValue = {
-  mounted() {
-    this.value = this.el.dataset.animatedValue
-  },
-
-  updated() {
-    let diff = this.value - this.el.dataset.animatedValue,
-      prev = this.value
-
-    this.value = this.el.dataset.animatedValue
-
-    animate(
-      (progress) => {
-        this.el.innerText = Math.round(prev - diff * progress)
-      },
-      {duration: 0.5, easing: spring()}
-    )
-  },
-}
+import hooks from "./hooks"
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content")
+
 let liveSocket = new LiveSocket("/live", Socket, {
-  hooks: Hooks,
+  hooks,
   params: {_csrf_token: csrfToken},
 })
 
